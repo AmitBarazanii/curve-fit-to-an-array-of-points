@@ -1,0 +1,30 @@
+import numpy as np
+import time
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+data=np.load(' //here you put the address of the file of the graphs you want to curvefit,, you can just put an array of points')['rec'] #takes the data from its place on the computer
+
+def func(x, a,b,c):
+    return a*np.exp(-0.5*(x-b)**2/c**2)
+
+area=np.concatenate((np.random.normal(500,200, size=2000), np.random.normal(0,50, size=10000)))
+bins=np.arange(-20,200)*5
+x=0.5*(bins[1:]+bins[:-1])
+rng1=np.nonzero(np.logical_and(x>-100, x<100))[0]
+rng2=np.nonzero(np.logical_and(x>200, x<900))[0]
+plt.figure()
+h=plt.hist(area, bins=bins)[0]
+p1, cov1=curve_fit(func, x[rng1], h[rng1], p0=[5000, 0, 20])
+err1 = np.sqrt(np.diag(cov1))
+p2, cov2=curve_fit(func, x[rng2], h[rng2], p0=[500, 500, 100])
+err2 = np.sqrt(np.diag(cov2))
+plt.plot(x[rng1], func(x[rng1], *p1), 'r--', linewidth=5,
+    label='Mean={}+/-{}, Width={}+/-{}'.format(np.round(p1[1]),np.round(err1[1]),np.round(p1[2]),np.round(err1[2])))
+plt.plot(x[rng2], func(x[rng2], *p2), 'g--', linewidth=5,
+    label='Mean={}+/-{}, Width={}+/-{}'.format(np.round(p2[1]),np.round(err2[1]),np.round(p2[2]),np.round(err2[2])))
+plt.yscale('log')
+plt.xlabel('Area [Digitizer counts]', fontsize=15)
+plt.ylabel('Distribution', fontsize=15)
+plt.legend(fontsize=15)
+plt.show()
